@@ -1,0 +1,113 @@
+{%extends 'layout.html'%}
+
+{% block title %}About TweetBar{% endblock %}
+
+{%block content%}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card bg-dark text-white border-0 shadow-lg">
+                <div class="card-header bg-primary bg-gradient text-white py-3">
+                    <h2 class="text-center mb-0">
+                        <i class="bi bi-info-circle-fill me-2"></i>About TweetBar
+                    </h2>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-twitter text-primary" style="font-size: 4rem;"></i>
+                    </div>
+                    
+                    <h3 class="border-bottom pb-2 mb-4">Our Mission</h3>
+                    <p class="lead">
+                        TweetBar is a simple, elegant platform for sharing your thoughts with the world. We believe in creating a space where ideas can flow freely and connections can be made.
+                    </p>
+                    
+                    <h3 class="border-bottom pb-2 mb-4 mt-5">Features</h3>
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    <i class="bi bi-pencil-square text-primary fs-3"></i>
+                                </div>
+                                <div class="ms-3">
+                                    <h5>Create Tweets</h5>
+                                    <p>Share your thoughts, ideas, and moments with text and images.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    <i class="bi bi-people-fill text-primary fs-3"></i>
+                                </div>
+                                <div class="ms-3">
+                                    <h5>User Accounts</h5>
+                                    <p>Create your personal profile and manage your content.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    <i class="bi bi-image text-primary fs-3"></i>
+                                </div>
+                                <div class="ms-3">
+                                    <h5>Image Sharing</h5>
+                                    <p>Upload and share images with your tweets.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    <i class="bi bi-shield-check text-primary fs-3"></i>
+                                </div>
+                                <div class="ms-3">
+                                    <h5>Secure Platform</h5>
+                                    <p>Built with Django for security and reliability.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3 class="border-bottom pb-2 mb-4 mt-5">Technology Stack</h3>
+                    <div class="row text-center g-3 mb-4">
+                        <div class="col-4 col-md-3">
+                            <div class="p-3 border rounded">
+                                <i class="bi bi-filetype-py text-primary fs-3"></i>
+                                <p class="mb-0 mt-2">Python</p>
+                            </div>
+                        </div>
+                        <div class="col-4 col-md-3">
+                            <div class="p-3 border rounded">
+                                <i class="bi bi-django text-primary fs-3"></i>
+                                <p class="mb-0 mt-2">Django</p>
+                            </div>
+                        </div>
+                        <div class="col-4 col-md-3">
+                            <div class="p-3 border rounded">
+                                <i class="bi bi-bootstrap text-primary fs-3"></i>
+                                <p class="mb-0 mt-2">Bootstrap</p>
+                            </div>
+                        </div>
+                        <div class="col-4 col-md-3">
+                            <div class="p-3 border rounded">
+                                <i class="bi bi-database text-primary fs-3"></i>
+                                <p class="mb-0 mt-2">SQLite</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-5">
+                        <a href="{% url 'tweet_list' %}" class="btn btn-primary btn-lg px-4 py-2">
+                            <i class="bi bi-arrow-left me-2"></i>Back to Tweets
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{%endblock%}
+
+

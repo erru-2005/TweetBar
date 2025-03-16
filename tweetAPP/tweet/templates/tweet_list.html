@@ -1,0 +1,129 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Tweet APP
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-white fw-bold">Latest Tweets</h2>
+        <a href="{% url 'tweet_create' %}" class="btn btn-primary rounded-pill px-4 py-2">
+            <i class="bi bi-plus-circle me-2"></i>Create Tweet
+        </a>
+    </div>
+    
+    <div class="row g-4">
+        {% for tweet in tweets %}
+        <div class="col-md-6 col-lg-4">
+            <div class="tweet-card">
+                <div class="tweet-image">
+                    <img src="{{ tweet.image.url }}" alt="Tweet Image">
+                </div>
+                <div class="tweet-content">
+                    <div class="user-info">
+                        <span class="username"><span class="text-danger">@</span>{{ tweet.user.username }}</span>
+                    </div>
+                    <p class="tweet-text">{{ tweet.content }}</p>
+                    {% if request.user == tweet.user %}
+                    <div class="tweet-actions">
+                        <a href="{% url 'tweet_edit' tweet.id %}" class="btn-action edit">Edit</a>
+                        <a href="{% url 'tweet_delete' tweet.id %}" class="btn-action delete">Delete</a>
+                    </div>
+                    {%endif%}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .tweet-card {
+        background: linear-gradient(to bottom, #ffffff, #f8f9fa);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    
+    .tweet-card:hover {
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        transform: translateY(-5px);
+    }
+    
+    .tweet-image {
+        width: 100%;
+        height: 220px;
+        overflow: hidden;
+    }
+    
+    .tweet-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+    
+    .tweet-card:hover .tweet-image img {
+        transform: scale(1.05);
+    }
+    
+    .tweet-content {
+        padding: 1.5rem;
+    }
+    
+    .user-info {
+        margin-bottom: 10px;
+    }
+    
+    .username {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: #3a86ff;
+    }
+    
+    .tweet-text {
+        color: #495057;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin-bottom: 1.2rem;
+    }
+    
+    .tweet-actions {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .btn-action {
+        padding: 8px 16px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-action.edit {
+        color: #3a86ff;
+        background-color: rgba(58, 134, 255, 0.1);
+    }
+    
+    .btn-action.edit:hover {
+        background-color: rgba(58, 134, 255, 0.2);
+    }
+    
+    .btn-action.delete {
+        color: #ff5a5f;
+        background-color: rgba(255, 90, 95, 0.1);
+    }
+    
+    .btn-action.delete:hover {
+        background-color: rgba(255, 90, 95, 0.2);
+    }
+</style>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+{% endblock %}
