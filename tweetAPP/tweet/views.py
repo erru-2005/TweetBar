@@ -50,9 +50,11 @@ def register(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
-            form.save()
+            user = form.save(commit=False)
+            user.set_password(form.cleaned_data['password1'])
+            user.save()
+            login(request, user)
             messages.success(request, 'Account created successfully! Please login.')
-            login(request, form.user)
             return redirect('tweet_list')
     else:
         form = UserCreationForm()
