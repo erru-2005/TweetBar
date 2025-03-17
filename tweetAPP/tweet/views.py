@@ -52,7 +52,8 @@ def register(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Account created successfully! Please login.')
-            return redirect('login')
+            login(request, form.user)
+            return redirect('tweet_list')
     else:
         form = UserCreationForm()
     return render(request, 'registration/register.html', {'form': form})
