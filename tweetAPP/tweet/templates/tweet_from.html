@@ -53,11 +53,13 @@
                         
                         <!-- Image Field -->
                         <div class="mb-3">
-                            <label for="{{ form.image.id_for_label }}" class="form-label">{{ form.image.label }} (Optional)</label>
+                            <label for="{{ form.image.id_for_label }}" class="form-label">
+                                {{ form.image.label }} <span class="badge bg-secondary">Optional</span>
+                            </label>
                             <div class="input-group">
                                 {{ form.image }}
                             </div>
-                            <div class="form-text">Accepted formats: JPG, PNG, GIF. Max size: 5MB</div>
+                            <div class="form-text text-muted">Accepted formats: JPG, PNG, GIF. Max size: 5MB. You can post a tweet without an image.</div>
                             {% if form.image.errors %}
                             <div class="invalid-feedback d-block">
                                 {% for error in form.image.errors %}
