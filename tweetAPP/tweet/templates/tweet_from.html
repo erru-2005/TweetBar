@@ -24,7 +24,7 @@
                     </div>
                     {% endif %}
                     
-                    <form method="post" enctype="multipart/form-data" novalidate>
+                    <form method="post" enctype="multipart/form-data" novalidate id="tweetForm">
                         {% csrf_token %}
                         
                         {% if form.non_field_errors %}
@@ -35,26 +35,65 @@
                         </div>
                         {% endif %}
                         
-                        {% for field in form %}
+                        <!-- Content Field -->
                         <div class="mb-3">
-                            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                            {{ field }}
-                            {% if field.errors %}
+                            <label for="{{ form.content.id_for_label }}" class="form-label">{{ form.content.label }}</label>
+                            {{ form.content }}
+                            <div class="form-text">
+                                <span id="charCount">0</span>/280 characters
+                            </div>
+                            {% if form.content.errors %}
                             <div class="invalid-feedback d-block">
-                                {% for error in field.errors %}
+                                {% for error in form.content.errors %}
                                 {{ error }}
                                 {% endfor %}
                             </div>
                             {% endif %}
-                            {% if field.help_text %}
-                            <div class="form-text">{{ field.help_text }}</div>
+                        </div>
+                        
+                        <!-- Image Field -->
+                        <div class="mb-3">
+                            <label for="{{ form.image.id_for_label }}" class="form-label">{{ form.image.label }} (Optional)</label>
+                            <div class="input-group">
+                                {{ form.image }}
+                            </div>
+                            <div class="form-text">Accepted formats: JPG, PNG, GIF. Max size: 5MB</div>
+                            {% if form.image.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.image.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Image Preview -->
+                            <div id="imagePreview" class="mt-2 d-none">
+                                <div class="card">
+                                    <div class="card-body p-2">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <img id="previewImg" src="#" class="img-fluid rounded" style="max-height: 200px;">
+                                            <button type="button" class="btn-close" id="removeImage" aria-label="Remove image"></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Current Image (if editing) -->
+                            {% if form.instance.image %}
+                            <div class="mt-2">
+                                <div class="card">
+                                    <div class="card-body p-2">
+                                        <p class="mb-1">Current image:</p>
+                                        <img src="{{ form.instance.image.url }}" class="img-fluid rounded" style="max-height: 200px;">
+                                    </div>
+                                </div>
+                            </div>
                             {% endif %}
                         </div>
-                        {% endfor %}
                         
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                             <a href="{% url 'tweet_list' %}" class="btn btn-secondary me-md-2">Cancel</a>
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
                                 <i class="bi bi-save me-1"></i>
                                 {% if form.instance.pk %}Update{% else %}Post{% endif %} Tweet
                             </button>
@@ -65,4 +104,96 @@
         </div>
     </div>
 </div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Character counter for tweet content
+        const contentField = document.getElementById('{{ form.content.id_for_label }}');
+        const charCount = document.getElementById('charCount');
+        const maxChars = 280;
+        
+        function updateCharCount() {
+            const currentLength = contentField.value.length;
+            charCount.textContent = currentLength;
+            
+            if (currentLength > maxChars) {
+                charCount.classList.add('text-danger');
+                charCount.classList.add('fw-bold');
+            } else {
+                charCount.classList.remove('text-danger');
+                charCount.classList.remove('fw-bold');
+            }
+        }
+        
+        contentField.addEventListener('input', updateCharCount);
+        updateCharCount(); // Initialize on page load
+        
+        // Image preview functionality
+        const imageInput = document.getElementById('id_tweet_image');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewImg = document.getElementById('previewImg');
+        const removeImageBtn = document.getElementById('removeImage');
+        
+        imageInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const file = this.files[0];
+                
+                // Check if file is an image
+                if (!file.type.startsWith('image/')) {
+                    alert('Please select a valid image file (JPG, PNG, GIF).');
+                    this.value = '';
+                    imagePreview.classList.add('d-none');
+                    return;
+                }
+                
+                // Check file size (5MB limit)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File is too large. Maximum size is 5MB.');
+                    this.value = '';
+                    imagePreview.classList.add('d-none');
+                    return;
+                }
+                
+                // Display preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    imagePreview.classList.remove('d-none');
+                }
+                reader.readAsDataURL(file);
+            } else {
+                imagePreview.classList.add('d-none');
+            }
+        });
+        
+        // Remove image button
+        removeImageBtn.addEventListener('click', function() {
+            imageInput.value = '';
+            imagePreview.classList.add('d-none');
+        });
+        
+        // Form validation
+        const tweetForm = document.getElementById('tweetForm');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        tweetForm.addEventListener('submit', function(e) {
+            let isValid = true;
+            
+            // Validate content
+            if (!contentField.value.trim()) {
+                isValid = false;
+                alert('Please enter some content for your tweet.');
+            } else if (contentField.value.length > maxChars) {
+                isValid = false;
+                alert(`Your tweet is too long. Please keep it under ${maxChars} characters.`);
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
+            }
+        });
+    });
+</script>
+{% endblock %}
 {% endblock %}

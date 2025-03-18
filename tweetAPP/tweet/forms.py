@@ -9,7 +9,8 @@ class TweetForm(forms.ModelForm):
         widget=forms.Textarea(attrs={
             'class': 'form-control',
             'rows': 4,
-            'placeholder': 'What\'s on your mind?'
+            'placeholder': 'What\'s on your mind?',
+            'required': 'required',
         }),
         error_messages={
             'required': 'Please enter some content for your tweet.',
@@ -21,7 +22,8 @@ class TweetForm(forms.ModelForm):
         required=False,
         widget=forms.FileInput(attrs={
             'class': 'form-control',
-            'accept': 'image/*'
+            'accept': 'image/*',
+            'id': 'id_tweet_image'
         }),
         error_messages={
             'invalid_image': 'The uploaded file is not a valid image.',
@@ -35,9 +37,21 @@ class TweetForm(forms.ModelForm):
         
     def clean_content(self):
         content = self.cleaned_data.get('content')
-        if content.strip() == '':
-            raise forms.ValidationError('Tweet cannot be empty or contain only whitespace.')
-        return content
+        if not content or content.strip() == '':
+            raise forms.ValidationError('Tweet content cannot be empty or contain only whitespace.')
+        return content.strip()
+        
+    def clean_image(self):
+        image = self.cleaned_data.get('image')
+        if image:
+            # Check if file is an image
+            if not hasattr(image, 'content_type') or not image.content_type.startswith('image'):
+                raise forms.ValidationError('The uploaded file is not a valid image.')
+                
+            # Check file size (limit to 5MB)
+            if image.size > 5 * 1024 * 1024:  # 5MB
+                raise forms.ValidationError('Image file is too large. Maximum size is 5MB.')
+        return image
 
 class UserRegistrationForm(UserCreationForm):
     email = forms.EmailField(

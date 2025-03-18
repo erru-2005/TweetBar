@@ -33,13 +33,14 @@ def tweet_create(request):
                 messages.success(request, "Tweet created successfully!")
                 return redirect('tweet_list')
             else:
-                # Handle form errors in a user-friendly way
-                for field, errors in form.errors.items():
-                    for error in errors:
-                        field_name = field
-                        if field in form.fields:
-                            field_name = form.fields[field].label or field
-                        messages.error(request, f"{field_name}: {error}")
+                # Server-side validation error handling
+                if 'content' in form.errors:
+                    messages.error(request, f"Content: {form.errors['content'][0]}")
+                if 'image' in form.errors:
+                    messages.error(request, f"Image: {form.errors['image'][0]}")
+                if form.non_field_errors():
+                    for error in form.non_field_errors():
+                        messages.error(request, error)
         else:
             form = TweetForm()
         return render(request, 'tweet_from.html', {'form': form})
@@ -70,13 +71,14 @@ def tweet_edit(request, pk):
                 messages.success(request, "Tweet updated successfully!")
                 return redirect('tweet_list')
             else:
-                # Handle form errors in a user-friendly way
-                for field, errors in form.errors.items():
-                    for error in errors:
-                        field_name = field
-                        if field in form.fields:
-                            field_name = form.fields[field].label or field
-                        messages.error(request, f"{field_name}: {error}")
+                # Server-side validation error handling
+                if 'content' in form.errors:
+                    messages.error(request, f"Content: {form.errors['content'][0]}")
+                if 'image' in form.errors:
+                    messages.error(request, f"Image: {form.errors['image'][0]}")
+                if form.non_field_errors():
+                    for error in form.non_field_errors():
+                        messages.error(request, error)
         else:
             form = TweetForm(instance=tweet)
         return render(request, 'tweet_from.html', {'form': form})
