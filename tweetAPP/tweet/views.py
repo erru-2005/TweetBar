@@ -1,64 +1,120 @@
 from .models import Tweet
-from .forms import UserRegistrationForm,TweetForm
+from .forms import UserRegistrationForm, TweetForm
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
+from django.core.exceptions import PermissionDenied
+from django.http import Http404
+
 # Create your views here.
 def index(request):
     return render(request, 'index.html')
 
 def tweet_list(request):
-    tweets = Tweet.objects.all().order_by('-created_at')
-    return render(request, 'tweet_list.html', {'tweets': tweets})
+    try:
+        tweets = Tweet.objects.all().order_by('-created_at')
+        return render(request, 'tweet_list.html', {'tweets': tweets})
+    except Exception as e:
+        messages.error(request, "There was an issue loading tweets. Please try again.")
+        return render(request, 'tweet_list.html', {'tweets': []})
+
 @login_required
 def tweet_create(request):
-    if request.method == 'POST':
-        form = TweetForm(request.POST, request.FILES)
-        if form.is_valid():
-            tweet = form.save(commit=False)
-            tweet.user = request.user
-            form.save()
-            return redirect('tweet_list')
-    else:
-        form = TweetForm()
-    return render(request, 'tweet_from.html', {'form': form})
+    try:
+        if request.method == 'POST':
+            form = TweetForm(request.POST, request.FILES)
+            if form.is_valid():
+                tweet = form.save(commit=False)
+                tweet.user = request.user
+                tweet.save()
+                messages.success(request, "Tweet created successfully!")
+                return redirect('tweet_list')
+            else:
+                messages.error(request, "Please correct the errors below.")
+        else:
+            form = TweetForm()
+        return render(request, 'tweet_from.html', {'form': form})
+    except Exception as e:
+        messages.error(request, "An error occurred while creating your tweet. Please try again.")
+        return redirect('tweet_list')
+
 @login_required
 def tweet_edit(request, pk):
-    tweet = get_object_or_404(Tweet, pk=pk)
-    if request.method == 'POST':
-        form = TweetForm(request.POST, request.FILES, instance=tweet)
-        if form.is_valid():
-            tweet = form.save(commit=False)
-            tweet.user = request.user
-            form.save()
+    try:
+        tweet = get_object_or_404(Tweet, pk=pk)
+        
+        # Check if user is the owner of the tweet
+        if tweet.user != request.user:
+            messages.error(request, "You don't have permission to edit this tweet.")
             return redirect('tweet_list')
-    else:
-        form = TweetForm(instance=tweet)
-    return render(request, 'tweet_from.html', {'form': form})
+            
+        if request.method == 'POST':
+            form = TweetForm(request.POST, request.FILES, instance=tweet)
+            if form.is_valid():
+                tweet = form.save(commit=False)
+                tweet.user = request.user
+                tweet.save()
+                messages.success(request, "Tweet updated successfully!")
+                return redirect('tweet_list')
+            else:
+                messages.error(request, "Please correct the errors below.")
+        else:
+            form = TweetForm(instance=tweet)
+        return render(request, 'tweet_from.html', {'form': form})
+    except Http404:
+        messages.error(request, "Tweet not found.")
+        return redirect('tweet_list')
+    except Exception as e:
+        messages.error(request, "An error occurred while updating your tweet. Please try again.")
+        return redirect('tweet_list')
+
 @login_required
 def tweet_delete(request, pk):
-    tweet = get_object_or_404(Tweet, pk=pk, user=request.user)
-    if request.method == 'POST':
-        tweet.delete()
+    try:
+        tweet = get_object_or_404(Tweet, pk=pk)
+        
+        # Check if user is the owner of the tweet
+        if tweet.user != request.user:
+            messages.error(request, "You don't have permission to delete this tweet.")
+            return redirect('tweet_list')
+            
+        if request.method == 'POST':
+            tweet.delete()
+            messages.success(request, "Tweet deleted successfully!")
+            return redirect('tweet_list')
+        return render(request, 'tweet_confirm_delete.html', {'tweet': tweet})
+    except Http404:
+        messages.error(request, "Tweet not found.")
         return redirect('tweet_list')
-    return render(request, 'tweet_confirm_delete.html', {'tweet': tweet})
-    
+    except Exception as e:
+        messages.error(request, "An error occurred while deleting your tweet. Please try again.")
+        return redirect('tweet_list')
 
 def register(request):
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save(commit=False)
-            user.set_password(form.cleaned_data['password1'])
-            user.save()
-            login(request, user)
-            messages.success(request, 'Account created successfully! Please login.')
-            return redirect('tweet_list')
-    else:
-        form = UserCreationForm()
-    return render(request, 'registration/register.html', {'form': form})
+    try:
+        if request.method == 'POST':
+            form = UserCreationForm(request.POST)
+            if form.is_valid():
+                user = form.save()
+                login(request, user)
+                messages.success(request, "Your account has been created successfully!")
+                return redirect('tweet_list')
+            else:
+                for field in form:
+                    for error in field.errors:
+                        messages.error(request, f"{field.label}: {error}")
+        else:
+            form = UserCreationForm()
+        return render(request, 'registration/register.html', {'form': form})
+    except Exception as e:
+        messages.error(request, "An error occurred during registration. Please try again.")
+        return render(request, 'registration/register.html', {'form': UserCreationForm()})
 
 def about(request):
-    return render(request, 'about.html')
+    try:
+        return render(request, 'about.html')
+    except Exception as e:
+        messages.error(request, "Unable to load the about page. Please try again.")
+        return redirect('tweet_list')
