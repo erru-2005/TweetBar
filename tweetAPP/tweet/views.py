@@ -141,3 +141,17 @@ def about(request):
     except Exception as e:
         messages.error(request, "Unable to load the about page. Please try again.")
         return redirect('tweet_list')
+
+def contact(request):
+    try:
+        if request.method == 'POST':
+            # Here you would typically handle the form submission
+            # For now, we'll just show a success message
+            messages.success(request, "Thank you for your message! We'll get back to you soon.")
+            return redirect('contact')
+        return render(request, 'contact.html')
+    except Exception as e:
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error in contact view: {str(e)}")
+        messages.error(request, "Unable to process your message. Please try again.")
+        return redirect('tweet_list')
